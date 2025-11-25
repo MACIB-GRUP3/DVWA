@@ -9,12 +9,6 @@ pipeline {
     // 🔨 Configuración de herramientas
     // Esto requiere que hayas configurado 'SonarQube Scanner' en "Manage Jenkins" -> "Global Tool Configuration"
     // (Ejemplo: le hemos dado el nombre 'SONAR_SCANNER_HOME' a la instalación).
-    tools {
-        // Asegúrate de reemplazar 'SONAR_SCANNER_HOME' con el nombre que le diste a la configuración en Jenkins
-        // Si no usas 'tools', tendrás que asegurarte de que la variable PATH sea correcta manualmente (como antes).
-        // Si usas 'tools', Jenkins añade automáticamente el binario al PATH para el pipeline.
-        sonarQubeScanner 'SONAR_SCANNER_HOME' 
-    }
 
     // 🌎 Variables de entorno
     environment {
