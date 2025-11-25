@@ -1,34 +1,29 @@
-/**
- * Pipeline para la integración continua, check-out, análisis de código con SonarQube
- * y espera del Quality Gate.
- */
 pipeline {
-    // Define dónde se ejecutará el pipeline. 'any' significa que puede ejecutarse en cualquier agente.
     agent any
 
-    // 🔨 Configuración de herramientas
-    // Esto requiere que hayas configurado 'SonarQube Scanner' en "Manage Jenkins" -> "Global Tool Configuration"
-    // (Ejemplo: le hemos dado el nombre 'SONAR_SCANNER_HOME' a la instalación).
+    // 🔨 Configuración de Herramientas
+    tools {
+        // Usamos el tipo de clase compatible con tu Jenkins 
+        // y el nombre exacto de la configuración de la herramienta (sonarqubescanner)
+        hudson.plugins.sonar.SonarRunnerInstallation 'sonarqubescanner' 
+    }
 
-    // 🌎 Variables de entorno
+    // 🌎 Variables de Entorno
     environment {
-        // Asegúrate de que 'SonarQube' coincide con el nombre de tu configuración de SonarQube en Jenkins
-        SONARQUBE_SERVER = 'SonarQube'
-        // Puedes definir otras variables para Sonar aquí si son constantes
+        // Nombre de la configuración del servidor SonarQube en Jenkins
+        SONARQUBE_SERVER = 'SonarQube' 
+        // Parámetros de análisis de SonarQube
         SONAR_PROJECT_KEY = 'testPipeLine'
         SONAR_SOURCES = 'vulnerabilities'
         SONAR_PHP_VERSION = '8.0'
-        
-        // La línea PATH original ya no es necesaria si usas el bloque 'tools'
-        // PATH = "/opt/sonar-scanner/bin:${env.PATH}"
     }
 
-    // 🏭 Definición de las etapas del Pipeline
+    // 🏭 Etapas del Pipeline
     stages {
         stage('Checkout SCM') {
             steps {
                 echo 'Checking out source code...'
-                // Obtiene el código fuente de Git (basado en la configuración del Job)
+                // Obtiene el código fuente de Git
                 checkout scm
             }
         }
@@ -36,10 +31,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Starting SonarQube analysis for project: ${env.SONAR_PROJECT_KEY}"
-                // Inyecta las variables de entorno para la conexión con SonarQube
+                // Inyecta las credenciales y URL del servidor SonarQube
                 withSonarQubeEnv(SONARQUBE_SERVER) {
                     sh """
-                    # La herramienta 'sonar-scanner' está ahora en el PATH gracias al bloque 'tools'
+                    # 'sonar-scanner' ahora se encuentra en el PATH gracias al bloque 'tools'
                     sonar-scanner \
                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                     -Dsonar.sources=${SONAR_SOURCES} \
@@ -52,22 +47,22 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo 'Waiting for SonarQube Quality Gate status...'
-                // Espera hasta 10 minutos por la respuesta del Quality Gate de SonarQube
+                // Espera hasta 10 minutos por el resultado del análisis
                 timeout(time: 10, unit: 'MINUTES') {
-                    // 'abortPipeline: true' asegura que el pipeline falla si el Quality Gate no pasa
+                    // Falla el pipeline si el Quality Gate no pasa
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
     }
     
-    // 🔔 Acciones post-construcción (se ejecutan sin importar el resultado del pipeline)
+    // 🔔 Acciones Post-construcción
     post {
         always {
             echo 'Finalizando el pipeline.'
         }
         failure {
-            echo 'El pipeline ha fallado. Revisar la etapa "SonarQube Analysis".'
+            echo 'El pipeline ha fallado. Revisar la etapa "SonarQube Analysis" o "Quality Gate".'
         }
         success {
             echo 'Pipeline ejecutado con éxito y Quality Gate aprobado.'
