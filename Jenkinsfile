@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    // 🔨 Configuración de Herramientas
-    tools {
-        // Usamos el tipo de clase compatible con tu Jenkins 
-        // y el nombre exacto de la configuración de la herramienta (sonarqubescanner)
-        hudson.plugins.sonar.SonarRunnerInstallation 'sonarqubescanner' 
-    }
-
     // 🌎 Variables de Entorno
     environment {
         // Nombre de la configuración del servidor SonarQube en Jenkins
