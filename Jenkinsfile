@@ -1,12 +1,9 @@
 pipeline {
     agent any
 
-    tools {
-        sonarQubeScanner 'sonarqubescanner'
-    }
-
     environment {
         SONARQUBE_SERVER = 'SonarQube'
+        PATH = "/opt/sonar-scanner/bin:${env.PATH}"
     }
 
     stages {
@@ -35,6 +32,10 @@ pipeline {
                     waitForQualityGate abortPipeline: true
                 }
             }
+        }
+    }
+}
+
         }
     }
 }
